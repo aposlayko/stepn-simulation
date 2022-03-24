@@ -1,4 +1,4 @@
-const energy = [
+const ENERGY = [
 /*0*/2.393,
 /*1*/2.393,
 /*2*/2.393,
@@ -21,6 +21,9 @@ const energy = [
   5.746,
 /*20*/5.95
 ];
+const MAX_LEVEL = 9;
+const LEVELING_COST = [0, 1, 2, 3, 4, 10, 6, 7, 8, 9, 30, 11, 12, 13, 14, 15, 16, 17, 18, 19, 80, 21, 22, 23, 24, 25, 26, 27, 28];
+
 
 class Sneaker {
   level = 5;
@@ -30,7 +33,7 @@ class Sneaker {
   }
 
   get earningsPerEnergy() {
-    return energy[this.level];
+    return ENERGY[this.level];
   }
 }
 
@@ -62,12 +65,25 @@ class Account {
   }
 
   run() {
-    this.gst += this.energy * this.sneakers[0].earningsPerEnergy;
+    const earnings = this.energy * this.sneakers[0].earningsPerEnergy;
+    this.gst += earnings
+    console.log(`(${this.accountName}) Running... earned ${earnings} GST. Balance ${this.gst} GST`);
+  }
+
+  levelUp() {
+    const sneakerLevel = this.sneakers[0].level;
+    const levelingCost = LEVELING_COST[sneakerLevel + 1];
+
+    if (sneakerLevel < MAX_LEVEL && this.gst >= levelingCost) {
+      this.gst -= levelingCost;
+      this.sneakers[0].level++;
+      console.log(`(${this.accountName}) Sneaker level up ${this.sneakers[0].level} level for ${levelingCost} GST. Balance ${this.gst} GST`);
+    }
   }
 
   log() {
     console.log(this.accountName);
-    console.log(this.gst);
+    console.log('GST:', this.gst);
     console.log(this.sneakers);
   }
 }
@@ -82,8 +98,12 @@ class Game {
 
   start() {
     while (true) {
+      console.log(`----- Day ${this.day} -----`);
+
       this.run();
-      this.nextDay();
+      this.levelUp();
+
+      this.day++;
       if (this.isFinal()) {
         this.log();
         break;
@@ -95,27 +115,26 @@ class Game {
     this.accounts.forEach(acc => acc.run());
   }
 
+  levelUp() {
+    this.accounts.forEach(acc => acc.levelUp());
+  }
+
   log() {
+    console.log('\n====== Finish ======');
     this.accounts.forEach(acc => acc.log());
   }
 
-  nextDay() {
-    console.log(`----- Day ${this.day} -----`);
-
-    this.day++;
-  }
-
   isFinal() {
-    return this.day >= 5;
+    return this.day >= 10;
   }
 }
 
 const sn1 = new Sneaker(5);
 const sn2 = new Sneaker(5);
 const sn3 = new Sneaker(5);
-const acc1 = new Account('Account 1', [sn1, sn2, sn3], 166);
+const acc1 = new Account('Account 1', [sn1, sn2, sn3], 0);
 const sn4 = new Sneaker(5);
-const acc2 = new Account('Account 2', [sn4], 3);
+const acc2 = new Account('Account 2', [sn4], 0);
 const game = new Game([acc1, acc2]);
 
 game.start();
