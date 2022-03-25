@@ -21,9 +21,9 @@ const ENERGY = [
   5.746,
 /*20*/5.95
 ];
-const MAX_LEVEL = 9;
+const MAX_LEVEL = 19;
 const LEVELING_COST = [0, 1, 2, 3, 4, 10, 6, 7, 8, 9, 30, 11, 12, 13, 14, 15, 16, 17, 18, 19, 80, 21, 22, 23, 24, 25, 26, 27, 28];
-
+const COST_OF_NEW_ACCOUNT = 220;
 
 class Sneaker {
   level = 5;
@@ -38,15 +38,19 @@ class Sneaker {
 }
 
 class Account {
-  accountName = 'Default name';
+  accountName;
   sneakers;
   gst = 0;
 
-  constructor(accountName, sneakers, gst) {
-    this.accountName = accountName;
+  constructor(sneakers, gst) {
+    this.accountName = `Account ${Account.index}`;
+    Account.index++;
+
     this.sneakers = sneakers;
     this.gst = gst;
   }
+
+  static index = 1;
 
   get energy() {
     const count = this.sneakers.length;
@@ -64,8 +68,12 @@ class Account {
     }
   }
 
+  getEarningsPerEnergy() {
+    return this.energy * this.sneakers[0].earningsPerEnergy;
+  }
+
   run() {
-    const earnings = this.energy * this.sneakers[0].earningsPerEnergy;
+    const earnings = this.getEarningsPerEnergy();
     this.gst += earnings
     console.log(`(${this.accountName}) Running... earned ${earnings} GST. Balance ${this.gst} GST`);
   }
@@ -77,14 +85,12 @@ class Account {
     if (sneakerLevel < MAX_LEVEL && this.gst >= levelingCost) {
       this.gst -= levelingCost;
       this.sneakers[0].level++;
-      console.log(`(${this.accountName}) Sneaker level up ${this.sneakers[0].level} level for ${levelingCost} GST. Balance ${this.gst} GST`);
+      console.log(`%c(${this.accountName}) Sneaker level up ${this.sneakers[0].level} level for ${levelingCost} GST. Balance ${this.gst} GST`, 'color: #27ca31');
     }
   }
 
   log() {
-    console.log(this.accountName);
-    console.log('GST:', this.gst);
-    console.log(this.sneakers);
+    console.log(this.accountName, `, ${this.gst} GST,`, this.sneakers);
   }
 }
 
@@ -101,7 +107,9 @@ class Game {
       console.log(`----- Day ${this.day} -----`);
 
       this.run();
+      this.logEarningsPerDay();
       this.levelUp();
+      this.createNewAccount();
 
       this.day++;
       if (this.isFinal()) {
@@ -115,8 +123,43 @@ class Game {
     this.accounts.forEach(acc => acc.run());
   }
 
+  logEarningsPerDay() {
+    console.log(`%cEarnings per day: ${this.accounts.reduce((accum, curr) => accum + curr.getEarningsPerEnergy(), 0)} GST`, 'color: orange');
+  }
+
   levelUp() {
     this.accounts.forEach(acc => acc.levelUp());
+  }
+
+  createNewAccount() {
+    let sumGst = this.getSumGst();
+    console.log(`%cSum of gst: ${sumGst}`, 'color: orange');
+    if (sumGst >= COST_OF_NEW_ACCOUNT) {
+      this.spendGst(COST_OF_NEW_ACCOUNT);
+      this.accounts.push(new Account([new Sneaker(5)], 0));
+      console.log(`%cCreated ${this.accounts[this.accounts.length - 1].accountName}`, 'color: #ea35e7');
+
+    }
+  }
+
+  getSumGst() {
+    return this.accounts.reduce((accum, curr) => accum + curr.gst, 0);
+  }
+
+  getSumEnergy() {
+    return this.accounts.reduce((accum, curr) => accum + curr.energy, 0);
+  }
+
+  spendGst(amount) {
+    let budget = amount;
+    this.accounts.forEach(acc => {
+      if (acc.gst <= budget) {
+        budget -= acc.gst;
+        acc.gst = 0;
+      } else {
+        acc.gst -= budget;
+      }
+    });
   }
 
   log() {
@@ -125,16 +168,20 @@ class Game {
   }
 
   isFinal() {
-    return this.day >= 10;
+    return this.getSumEnergy() >= 24;
   }
 }
 
-const sn1 = new Sneaker(5);
-const sn2 = new Sneaker(5);
-const sn3 = new Sneaker(5);
-const acc1 = new Account('Account 1', [sn1, sn2, sn3], 0);
-const sn4 = new Sneaker(5);
-const acc2 = new Account('Account 2', [sn4], 0);
+const acc1 = new Account([
+  new Sneaker(5),
+  new Sneaker(5),
+  new Sneaker(5)
+], 0);
+
+const acc2 = new Account([
+    new Sneaker(5)
+], 0);
+
 const game = new Game([acc1, acc2]);
 
 game.start();
