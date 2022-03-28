@@ -21,9 +21,13 @@ const ENERGY = [
   5.746,
 /*20*/5.95
 ];
-const MAX_LEVEL = 19;
 const LEVELING_COST = [0, 1, 2, 3, 4, 10, 6, 7, 8, 9, 30, 11, 12, 13, 14, 15, 16, 17, 18, 19, 80, 21, 22, 23, 24, 25, 26, 27, 28];
 const COST_OF_NEW_ACCOUNT = 220;
+
+const MAX_LEVEL = 9;
+const END_DATE = 1000;
+const MAX_ENERGY = 100;
+const MAX_EARNINGS_PER_DAY = 100;
 
 class Sneaker {
   level = 5;
@@ -109,7 +113,9 @@ class Game {
       this.run();
       this.logEarningsPerDay();
       this.levelUp();
+      this.logSumGst();
       this.createNewAccount();
+      this.logSumEnergy();
 
       this.day++;
       if (this.isFinal()) {
@@ -123,8 +129,12 @@ class Game {
     this.accounts.forEach(acc => acc.run());
   }
 
+  getEarningsPerDay() {
+    return this.accounts.reduce((accum, curr) => accum + curr.getEarningsPerEnergy(), 0);
+  }
+
   logEarningsPerDay() {
-    console.log(`%cEarnings per day: ${this.accounts.reduce((accum, curr) => accum + curr.getEarningsPerEnergy(), 0)} GST`, 'color: orange');
+    console.log(`%cEarnings per day: ${this.getEarningsPerDay()} GST`, 'color: orange');
   }
 
   levelUp() {
@@ -132,9 +142,7 @@ class Game {
   }
 
   createNewAccount() {
-    let sumGst = this.getSumGst();
-    console.log(`%cSum of gst: ${sumGst}`, 'color: orange');
-    if (sumGst >= COST_OF_NEW_ACCOUNT) {
+    if (this.getSumGst() >= COST_OF_NEW_ACCOUNT) {
       this.spendGst(COST_OF_NEW_ACCOUNT);
       this.accounts.push(new Account([new Sneaker(5)], 0));
       console.log(`%cCreated ${this.accounts[this.accounts.length - 1].accountName}`, 'color: #ea35e7');
@@ -146,8 +154,16 @@ class Game {
     return this.accounts.reduce((accum, curr) => accum + curr.gst, 0);
   }
 
+  logSumGst() {
+    console.log(`%cSum of gst: ${this.getSumGst()}`, 'color: orange');
+  }
+
   getSumEnergy() {
     return this.accounts.reduce((accum, curr) => accum + curr.energy, 0);
+  }
+
+  logSumEnergy() {
+    console.log(`%cSum of energy: ${this.getSumEnergy()}`, 'color: #64ecff');
   }
 
   spendGst(amount) {
@@ -168,20 +184,35 @@ class Game {
   }
 
   isFinal() {
-    return this.getSumEnergy() >= 24;
+    if (this.getSumEnergy() >= MAX_ENERGY) {
+      console.log(`%cMax energy achieved: ${MAX_ENERGY}`, 'color: red');
+      return true;
+    } else if (this.day >= END_DATE) {
+      console.log(`%cEnd date achieved: ${END_DATE}`, 'color: red');
+      return true;
+    } else if (this.getEarningsPerDay() >= MAX_EARNINGS_PER_DAY) {
+      console.log(`%cMax earnings achieved: ${MAX_EARNINGS_PER_DAY}`, 'color: red');
+      return true;
+    }
+
+    return false;
   }
 }
 
 const acc1 = new Account([
-  new Sneaker(5),
+  new Sneaker(9),
   new Sneaker(5),
   new Sneaker(5)
 ], 0);
 
 const acc2 = new Account([
-    new Sneaker(5)
+    new Sneaker(9)
 ], 0);
 
-const game = new Game([acc1, acc2]);
+const acc3 = new Account([
+  new Sneaker(9)
+], 0);
+
+const game = new Game([acc1, acc2, acc3]);
 
 game.start();
