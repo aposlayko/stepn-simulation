@@ -24,10 +24,12 @@ const ENERGY = [
 const LEVELING_COST = [0, 1, 2, 3, 4, 10, 6, 7, 8, 9, 30, 11, 12, 13, 14, 15, 16, 17, 18, 19, 80, 21, 22, 23, 24, 25, 26, 27, 28];
 const COST_OF_NEW_ACCOUNT = 220;
 
-const MAX_LEVEL = 9;
-const END_DATE = 1000;
-const MAX_ENERGY = 100;
-const MAX_EARNINGS_PER_DAY = 100;
+
+const MAX_LEVEL = 19;
+const END_DATE = 500;
+const MAX_ENERGY = 30;
+const MAX_EARNINGS_PER_DAY = 1000;
+const ENERGY_LIMIT = 24;
 
 class Sneaker {
   level = 5;
@@ -142,7 +144,7 @@ class Game {
   }
 
   createNewAccount() {
-    if (this.getSumGst() >= COST_OF_NEW_ACCOUNT) {
+    if (this.getSumGst() >= COST_OF_NEW_ACCOUNT && this.getSumEnergy() < ENERGY_LIMIT) {
       this.spendGst(COST_OF_NEW_ACCOUNT);
       this.accounts.push(new Account([new Sneaker(5)], 0));
       console.log(`%cCreated ${this.accounts[this.accounts.length - 1].accountName}`, 'color: #ea35e7');
