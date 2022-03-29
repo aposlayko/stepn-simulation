@@ -25,17 +25,13 @@ const LEVELING_COST = [0, 1, 2, 3, 4, 10, 6, 7, 8, 9, 30, 11, 12, 13, 14, 15, 16
 const COST_OF_NEW_ACCOUNT = 220;
 
 
-const MAX_LEVEL = 19;
-const END_DATE = 500;
-const MAX_ENERGY = 30;
-const MAX_EARNINGS_PER_DAY = 1000;
-const ENERGY_LIMIT = 24;
+
 
 class Sneaker {
-  level = 5;
+  level;
 
   constructor(level) {
-    this.level = level;
+    this.level = level || 5;
   }
 
   get earningsPerEnergy() {
@@ -43,17 +39,20 @@ class Sneaker {
   }
 }
 
+
 class Account {
   accountName;
   sneakers;
   gst = 0;
+  maxLevel;
 
-  constructor(sneakers, gst) {
+  constructor(sneakers, gst, options) {
     this.accountName = `Account ${Account.index}`;
     Account.index++;
 
     this.sneakers = sneakers;
     this.gst = gst;
+    this.maxLevel = options?.maxLevel || 5;
   }
 
   static index = 1;
@@ -88,7 +87,7 @@ class Account {
     const sneakerLevel = this.sneakers[0].level;
     const levelingCost = LEVELING_COST[sneakerLevel + 1];
 
-    if (sneakerLevel < MAX_LEVEL && this.gst >= levelingCost) {
+    if (sneakerLevel < this.maxLevel && this.gst >= levelingCost) {
       this.gst -= levelingCost;
       this.sneakers[0].level++;
       console.log(`%c(${this.accountName}) Sneaker level up ${this.sneakers[0].level} level for ${levelingCost} GST. Balance ${this.gst} GST`, 'color: #27ca31');
@@ -100,17 +99,37 @@ class Account {
   }
 }
 
+
 class Game {
   accounts = [];
   day = 0;
+  logs = {
+    earnings: [],
+    energy: []
+  }
 
-  constructor(accounts) {
-    this.accounts = accounts;
+  maxLevel;
+  endDate;
+  maxEnergy;
+  energyLimit;
+  maxEarningsPerDay;
+
+  constructor(accountParams, options) {
+    this.maxLevel = options.maxLevel || 5;
+    this.endDate = options.endDate || 100;
+    this.maxEnergy = options.maxEnergy || 26;
+    this.energyLimit = options.energyLimit || 24;
+    this.maxEarningsPerDay = options.maxEarningsPerDay || 100;
+
+    this.accounts = accountParams.map(accParam => {
+      return new Account(accParam.sneakers, accParam.gst, this.maxLevel)
+    })
   }
 
   start() {
     while (true) {
       console.log(`----- Day ${this.day} -----`);
+      this.writeLogs();
 
       this.run();
       this.logEarningsPerDay();
@@ -121,7 +140,7 @@ class Game {
 
       this.day++;
       if (this.isFinal()) {
-        this.log();
+        this.finishLog();
         break;
       }
     }
@@ -144,9 +163,9 @@ class Game {
   }
 
   createNewAccount() {
-    if (this.getSumGst() >= COST_OF_NEW_ACCOUNT && this.getSumEnergy() < ENERGY_LIMIT) {
+    if (this.getSumGst() >= COST_OF_NEW_ACCOUNT && this.getSumEnergy() < this.energyLimit) {
       this.spendGst(COST_OF_NEW_ACCOUNT);
-      this.accounts.push(new Account([new Sneaker(5)], 0));
+      this.accounts.push(new Account([new Sneaker(5)], 0, {maxLevel: this.maxLevel}));
       console.log(`%cCreated ${this.accounts[this.accounts.length - 1].accountName}`, 'color: #ea35e7');
 
     }
@@ -180,20 +199,25 @@ class Game {
     });
   }
 
-  log() {
+  finishLog() {
     console.log('\n====== Finish ======');
     this.accounts.forEach(acc => acc.log());
   }
 
+  writeLogs() {
+    this.logs.earnings.push(Math.round(this.getEarningsPerDay() * 100) / 100);
+    this.logs.energy.push(this.getSumEnergy());
+  }
+
   isFinal() {
-    if (this.getSumEnergy() >= MAX_ENERGY) {
-      console.log(`%cMax energy achieved: ${MAX_ENERGY}`, 'color: red');
+    if (this.getSumEnergy() >= this.maxEnergy) {
+      console.log(`%cMax energy achieved: ${this.maxEnergy}`, 'color: red');
       return true;
-    } else if (this.day >= END_DATE) {
-      console.log(`%cEnd date achieved: ${END_DATE}`, 'color: red');
+    } else if (this.day >= this.endDate) {
+      console.log(`%cEnd date achieved: ${this.endDate}`, 'color: red');
       return true;
-    } else if (this.getEarningsPerDay() >= MAX_EARNINGS_PER_DAY) {
-      console.log(`%cMax earnings achieved: ${MAX_EARNINGS_PER_DAY}`, 'color: red');
+    } else if (this.getEarningsPerDay() >= this.maxEarningsPerDay) {
+      console.log(`%cMax earnings achieved: ${this.maxEarningsPerDay}`, 'color: red');
       return true;
     }
 
@@ -201,34 +225,76 @@ class Game {
   }
 }
 
-const acc1 = new Account([
-  new Sneaker(9),
-  new Sneaker(5),
-  new Sneaker(5)
-], 0);
 
-const acc2 = new Account([
-    new Sneaker(9)
-], 0);
+const game1 = new Game([{
+  sneakers: [new Sneaker(9), new Sneaker(), new Sneaker()], gst: 72
+}, {
+  sneakers: [new Sneaker(9)], gst: 68
+}, {
+  sneakers: [new Sneaker(9)], gst: 7
+}], {
+  maxLevel: 19,
+  endDate: 100,
+  maxEnergy: 26,
+  energyLimit: 24,
+  maxEarningsPerDay: 200
+});
 
-const acc3 = new Account([
-  new Sneaker(9)
-], 0);
-
-const game = new Game([acc1, acc2, acc3]);
-
-game.start();
+game1.start();
 
 
+
+const game2 = new Game([{
+  sneakers: [new Sneaker(9), new Sneaker(), new Sneaker()], gst: 72
+}, {
+  sneakers: [new Sneaker(9)], gst: 68
+}, {
+  sneakers: [new Sneaker(9)], gst: 7
+}], {
+  maxLevel: 9,
+  endDate: 100,
+  maxEnergy: 26,
+  energyLimit: 24,
+  maxEarningsPerDay: 200
+});
+
+game2.start();
+
+
+
+function generateData(logs) {
+  let maxLength = 0;
+  let maxIndex = 0;
+  logs.forEach((l, i) => {
+    if (l.length > maxLength) {
+      maxLength = l.length;
+      maxIndex = i;
+    }
+  });
+
+  return {
+    labels: logs[maxIndex].map((l, i) => i),
+    series: [
+      ...logs
+    ]
+  }
+
+}
+
+const energyData = generateData([game1.logs.energy, game2.logs.energy]);
+const earningsData = generateData([game1.logs.earnings, game2.logs.earnings]);
+
+
+// https://gionkunz.github.io/chartist-js/api-documentation.html
 // Our labels and three data series
-const data = {
+/*const data = {
   labels: ['Week1', 'Week2', 'Week3', 'Week4', 'Week5', 'Week6'],
   series: [
     [5, 4, 3, 7, 5, 10],
     [3, 2, 9, 5, 4, 6],
     [2, 1, -3, -4, -2, 0]
   ]
-};
+};*/
 
 // We are setting a few options for our chart and override the defaults
 const options = {
@@ -240,7 +306,9 @@ const options = {
   axisX: {},
   // Y-Axis specific configuration
   axisY: {},
+  height: '600px'
 };
 
 // All you need to do is pass your configuration as third parameter to the chart function
-new Chartist.Line('.ct-chart', data, options);
+new Chartist.Line('.energy', energyData, options);
+new Chartist.Line('.earnings', earningsData, options);
