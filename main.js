@@ -1,25 +1,35 @@
 const ENERGY = [
-/*0*/2.393,
-/*1*/2.393,
-/*2*/2.393,
-/*3*/2.393,
-/*4*/2.393,
-/*5*/2.393,
-  2.611,
-  2.975,
-  3.281,
-  3.536,
-/*10*/3.74,
-  4.012,
-  4.284,
-  4.488,
-  4.641,
-/*15*/4.845,
-  5.117,
-  5.338,
-  5.542,
-  5.746,
-/*20*/5.95
+/*0*/2,
+/*1*/2.3,
+/*2*/2.3,
+/*3*/2.3,
+/*4*/2.3,
+/*5*/2.3,
+  2.69, /*0.39*/
+  3,    /*0.31*/
+  3.35, /*0.35*/
+  3.66, /*0.31*/
+/*10*/3.95,/*0.29*/
+  4.2,  /*0.25*/
+  4.43, /*0.23*/
+  4.65, /*0.22*/
+  4.85, /*0.2*/
+/*15*/5.05,/*0.2*/
+  5.25,  /*0.2*/
+  5.48,  /*0.23*/
+  5.67,  /*0.18*/
+  5.85,  /*0.18*/
+/*20*/6.02,/*0.17*/
+  6.18,  /*0.16*/
+  6.34,  /*0.16*/
+  6.48,  /*0.14*/
+  6.62,  /*0.14*/
+/*25*/6.76,/*0.14*/
+  6.9,   /*0.14*/
+  7.05,  /*0.15*/
+  7.2,   /*0.15*/
+  7.32,  /*0.12*/
+/*30*/7.45 /*0.13*/
 ];
 const LEVELING_COST = [0, 1, 2, 3, 4, 10, 6, 7, 8, 9, 30, 11, 12, 13, 14, 15, 16, 17, 18, 19, 80, 21, 22, 23, 24, 25, 26, 27, 28];
 const COST_OF_NEW_ACCOUNT = 220;
@@ -235,9 +245,9 @@ const game1 = new Game([{
 }], {
   maxLevel: 19,
   endDate: 100,
-  maxEnergy: 26,
-  energyLimit: 24,
-  maxEarningsPerDay: 200
+  maxEnergy: 44,
+  energyLimit: 42,
+  maxEarningsPerDay: 300
 });
 
 game1.start();
@@ -251,11 +261,11 @@ const game2 = new Game([{
 }, {
   sneakers: [new Sneaker(9)], gst: 7
 }], {
-  maxLevel: 9,
+  maxLevel: 19,
   endDate: 100,
-  maxEnergy: 26,
-  energyLimit: 24,
-  maxEarningsPerDay: 200
+  maxEnergy: 44,
+  energyLimit: 42,
+  maxEarningsPerDay: 300
 });
 
 game2.start();
@@ -305,8 +315,10 @@ const options = {
   // X-Axis specific configuration
   axisX: {},
   // Y-Axis specific configuration
-  axisY: {},
-  height: '600px'
+  axisY: {
+    onlyInteger: true,
+  },
+  height: '500px',
 };
 
 // All you need to do is pass your configuration as third parameter to the chart function
