@@ -83,12 +83,12 @@ class Account {
     }
   }
 
-  getEarningsPerEnergy() {
+  getEarningsPerDay() {
     return this.energy * this.sneakers[0].earningsPerEnergy;
   }
 
   run() {
-    const earnings = this.getEarningsPerEnergy();
+    const earnings = this.getEarningsPerDay();
     this.gst += earnings
     console.log(`(${this.accountName}) Running... earned ${earnings} GST. Balance ${this.gst} GST`);
   }
@@ -116,13 +116,15 @@ class Game {
   logs = {
     earnings: [],
     energy: []
-  }
+  };
+  deposit = 0;
 
   maxLevel;
   endDate;
   maxEnergy;
   energyLimit;
   maxEarningsPerDay;
+  takeMoneyEveryNDay;
 
   constructor(accountParams, options) {
     this.maxLevel = options.maxLevel || 5;
@@ -130,6 +132,7 @@ class Game {
     this.maxEnergy = options.maxEnergy || 26;
     this.energyLimit = options.energyLimit || 24;
     this.maxEarningsPerDay = options.maxEarningsPerDay || 100;
+    this.takeMoneyEveryNDay = options.takeMoneyEveryNDay || Infinity;
 
     this.accounts = accountParams.map(accParam => {
       return new Account(accParam.sneakers, accParam.gst, this.maxLevel)
@@ -143,6 +146,7 @@ class Game {
 
       this.run();
       this.logEarningsPerDay();
+      this.takeMoney();
       this.levelUp();
       this.logSumGst();
       this.createNewAccount();
@@ -161,11 +165,21 @@ class Game {
   }
 
   getEarningsPerDay() {
-    return this.accounts.reduce((accum, curr) => accum + curr.getEarningsPerEnergy(), 0);
+    return this.accounts.reduce((accum, curr) => accum + curr.getEarningsPerDay(), 0);
   }
 
   logEarningsPerDay() {
     console.log(`%cEarnings per day: ${this.getEarningsPerDay()} GST`, 'color: orange');
+  }
+
+  takeMoney() {
+    if (this.day && this.day % this.takeMoneyEveryNDay === 0) {
+      this.accounts.forEach(acc => {
+        const todayEarnings = acc.getEarningsPerDay();
+        acc.gst -= todayEarnings;
+        this.deposit += todayEarnings;
+      });
+    }
   }
 
   levelUp() {
@@ -212,6 +226,7 @@ class Game {
   finishLog() {
     console.log('\n====== Finish ======');
     this.accounts.forEach(acc => acc.log());
+    console.log(`Deposit: ${this.deposit} GST (${this.deposit * 4.3})`);
   }
 
   writeLogs() {
@@ -245,9 +260,9 @@ const game1 = new Game([{
 }], {
   maxLevel: 19,
   endDate: 100,
-  maxEnergy: 44,
-  energyLimit: 42,
-  maxEarningsPerDay: 300
+  maxEnergy: 26,
+  energyLimit: 24,
+  maxEarningsPerDay: 300,
 });
 
 game1.start();
@@ -263,9 +278,10 @@ const game2 = new Game([{
 }], {
   maxLevel: 19,
   endDate: 100,
-  maxEnergy: 44,
-  energyLimit: 42,
-  maxEarningsPerDay: 300
+  maxEnergy: 26,
+  energyLimit: 24,
+  maxEarningsPerDay: 300,
+  takeMoneyEveryNDay: 7,
 });
 
 game2.start();
