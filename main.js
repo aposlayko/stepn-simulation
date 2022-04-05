@@ -33,7 +33,7 @@ const ENERGY = [
 ];
 const LEVELING_COST = [0, 1, 2, 3, 4, 10, 6, 7, 8, 9, 30, 11, 12, 13, 14, 15, 16, 17, 18, 19, 80, 21, 22, 23, 24, 25, 26, 27, 28];
 const COST_OF_NEW_ACCOUNT = 220;
-
+const SNEAKER_COST = 8.4 * (130 / 4.3);
 
 
 
@@ -60,7 +60,7 @@ class Account {
     this.accountName = `Account ${Account.index}`;
     Account.index++;
 
-    this.sneakers = sneakers;
+    this.sneakers = sneakers || [];
     this.gst = gst;
     this.maxLevel = options?.maxLevel || 5;
   }
@@ -87,10 +87,21 @@ class Account {
     return this.energy * this.sneakers[0].earningsPerEnergy;
   }
 
+  getCapitalization() {
+    let capa = 0;
+    capa += this.gst;
+
+    this.sneakers.forEach(sn => {
+      capa += SNEAKER_COST + SNEAKER_COST * 0.005 * sn.level;
+    });
+
+    return capa;
+  }
+
   run() {
     const earnings = this.getEarningsPerDay();
     this.gst += earnings
-    console.log(`(${this.accountName}) Running... earned ${earnings} GST. Balance ${this.gst} GST`);
+    // console.log(`(${this.accountName}) Running... earned ${earnings} GST. Balance ${this.gst} GST`);
   }
 
   levelUp() {
@@ -100,7 +111,7 @@ class Account {
     if (sneakerLevel < this.maxLevel && this.gst >= levelingCost) {
       this.gst -= levelingCost;
       this.sneakers[0].level++;
-      console.log(`%c(${this.accountName}) Sneaker level up ${this.sneakers[0].level} level for ${levelingCost} GST. Balance ${this.gst} GST`, 'color: #27ca31');
+      // console.log(`%c(${this.accountName}) Sneaker level up ${this.sneakers[0].level} level for ${levelingCost} GST. Balance ${this.gst} GST`, 'color: #27ca31');
     }
   }
 
@@ -115,7 +126,8 @@ class Game {
   day = 0;
   logs = {
     earnings: [],
-    energy: []
+    energy: [],
+    capitalization: [],
   };
   deposit = 0;
 
@@ -124,7 +136,9 @@ class Game {
   maxEnergy;
   energyLimit;
   maxEarningsPerDay;
+  maxGST;
   takeMoneyEveryNDay;
+  enableLogs;
 
   constructor(accountParams, options) {
     this.maxLevel = options.maxLevel || 5;
@@ -133,6 +147,8 @@ class Game {
     this.energyLimit = options.energyLimit || 24;
     this.maxEarningsPerDay = options.maxEarningsPerDay || 100;
     this.takeMoneyEveryNDay = options.takeMoneyEveryNDay || Infinity;
+    this.maxGST = options.maxGST || Infinity;
+    this.enableLogs = options.enableLogs || false;
 
     this.accounts = accountParams.map(accParam => {
       return new Account(accParam.sneakers, accParam.gst, this.maxLevel)
@@ -141,20 +157,19 @@ class Game {
 
   start() {
     while (true) {
-      console.log(`----- Day ${this.day} -----`);
+      this.enableLogs && console.log(`----- Day ${this.day} -----`);
       this.writeLogs();
 
       this.run();
-      this.logEarningsPerDay();
+      this.enableLogs && this.logEarningsPerDay();
       this.takeMoney();
       this.levelUp();
-      this.logSumGst();
+      this.enableLogs && this.logSumGst();
       this.createNewAccount();
-      this.logSumEnergy();
+      this.enableLogs && this.logSumEnergy();
 
       this.day++;
       if (this.isFinal()) {
-        this.finishLog();
         break;
       }
     }
@@ -190,9 +205,13 @@ class Game {
     if (this.getSumGst() >= COST_OF_NEW_ACCOUNT && this.getSumEnergy() < this.energyLimit) {
       this.spendGst(COST_OF_NEW_ACCOUNT);
       this.accounts.push(new Account([new Sneaker(5)], 0, {maxLevel: this.maxLevel}));
-      console.log(`%cCreated ${this.accounts[this.accounts.length - 1].accountName}`, 'color: #ea35e7');
+      this.enableLogs && console.log(`%cCreated ${this.accounts[this.accounts.length - 1].accountName}`, 'color: #ea35e7');
 
     }
+  }
+
+  getCapitalization() {
+    return this.accounts.reduce((accum, curr) => accum + curr.getCapitalization(), 0);
   }
 
   getSumGst() {
@@ -227,11 +246,13 @@ class Game {
     console.log('\n====== Finish ======');
     this.accounts.forEach(acc => acc.log());
     console.log(`Deposit: ${this.deposit} GST (${this.deposit * 4.3})`);
+    console.log(`Capitalization: ${this.getCapitalization()} GST (${this.getCapitalization() * 4.3})`);
   }
 
   writeLogs() {
     this.logs.earnings.push(Math.round(this.getEarningsPerDay() * 100) / 100);
     this.logs.energy.push(this.getSumEnergy());
+    this.logs.capitalization.push(this.getCapitalization());
   }
 
   isFinal() {
@@ -244,6 +265,9 @@ class Game {
     } else if (this.getEarningsPerDay() >= this.maxEarningsPerDay) {
       console.log(`%cMax earnings achieved: ${this.maxEarningsPerDay}`, 'color: red');
       return true;
+    } else if (this.getSumGst() >= 2000) {
+      console.log(`%cMax GST achived: ${this.maxGST}`, 'color: red');
+      return true;
     }
 
     return false;
@@ -252,17 +276,21 @@ class Game {
 
 
 const game1 = new Game([{
-  sneakers: [new Sneaker(9), new Sneaker(), new Sneaker()], gst: 72
+  sneakers: [new Sneaker(9), new Sneaker(), new Sneaker()], gst: 20
 }, {
-  sneakers: [new Sneaker(9)], gst: 68
+  sneakers: [new Sneaker(9)], gst: 5
 }, {
   sneakers: [new Sneaker(9)], gst: 7
+}, {
+  sneakers: [new Sneaker(4)], gst: 0
 }], {
-  maxLevel: 19,
+  maxLevel: 9,
   endDate: 100,
-  maxEnergy: 26,
-  energyLimit: 24,
+  maxEnergy: 38,
+  energyLimit: 36,
   maxEarningsPerDay: 300,
+  takeMoneyEveryNDay: 7,
+  maxGST: 2861,
 });
 
 game1.start();
@@ -270,11 +298,13 @@ game1.start();
 
 
 const game2 = new Game([{
-  sneakers: [new Sneaker(9), new Sneaker(), new Sneaker()], gst: 72
+  sneakers: [new Sneaker(9), new Sneaker(), new Sneaker()], gst: 20
 }, {
-  sneakers: [new Sneaker(9)], gst: 68
+  sneakers: [new Sneaker(9)], gst: 5
 }, {
   sneakers: [new Sneaker(9)], gst: 7
+}, {
+  sneakers: [new Sneaker(4)], gst: 0
 }], {
   maxLevel: 19,
   endDate: 100,
@@ -282,10 +312,13 @@ const game2 = new Game([{
   energyLimit: 24,
   maxEarningsPerDay: 300,
   takeMoneyEveryNDay: 7,
+  maxGST: 4016,
 });
 
 game2.start();
 
+game1.finishLog();
+game2.finishLog();
 
 
 function generateData(logs) {
@@ -309,6 +342,7 @@ function generateData(logs) {
 
 const energyData = generateData([game1.logs.energy, game2.logs.energy]);
 const earningsData = generateData([game1.logs.earnings, game2.logs.earnings]);
+const capitalizationData = generateData([game1.logs.capitalization, game2.logs.capitalization]);
 
 
 // https://gionkunz.github.io/chartist-js/api-documentation.html
@@ -340,3 +374,4 @@ const options = {
 // All you need to do is pass your configuration as third parameter to the chart function
 new Chartist.Line('.energy', energyData, options);
 new Chartist.Line('.earnings', earningsData, options);
+new Chartist.Line('.capa', capitalizationData, options);
