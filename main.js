@@ -266,7 +266,7 @@ class Game {
       console.log(`%cMax earnings achieved: ${this.maxEarningsPerDay}`, 'color: red');
       return true;
     } else if (this.getSumGst() >= 2000) {
-      console.log(`%cMax GST achived: ${this.maxGST}`, 'color: red');
+      console.log(`%cMax GST achived: ${this.maxGST} (in ${this.day} days)`, 'color: red');
       return true;
     }
 
@@ -306,19 +306,19 @@ const game2 = new Game([{
 }, {
   sneakers: [new Sneaker(4)], gst: 0
 }], {
-  maxLevel: 19,
+  maxLevel: 9,
   endDate: 100,
   maxEnergy: 26,
-  energyLimit: 24,
+  energyLimit: 14,
   maxEarningsPerDay: 300,
   takeMoneyEveryNDay: 7,
-  maxGST: 4016,
+  maxGST: 441 + 220*22,
 });
 
 game2.start();
 
-game1.finishLog();
-game2.finishLog();
+// game1.finishLog();
+// game2.finishLog();
 
 
 function generateData(logs) {
