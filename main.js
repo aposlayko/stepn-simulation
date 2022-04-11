@@ -276,13 +276,13 @@ class Game {
 
 
 const game1 = new Game([{
-  sneakers: [new Sneaker(9), new Sneaker(), new Sneaker()], gst: 20
+  sneakers: [new Sneaker(12), new Sneaker(), new Sneaker()], gst: 85
 }, {
-  sneakers: [new Sneaker(9)], gst: 5
+  sneakers: [new Sneaker(11)], gst: 37
 }, {
-  sneakers: [new Sneaker(9)], gst: 7
+  sneakers: [new Sneaker(11)], gst: 27
 }, {
-  sneakers: [new Sneaker(4)], gst: 0
+  sneakers: [new Sneaker(9)], gst: 9
 }], {
   maxLevel: 9,
   endDate: 100,
@@ -298,13 +298,13 @@ game1.start();
 
 
 const game2 = new Game([{
-  sneakers: [new Sneaker(9), new Sneaker(), new Sneaker()], gst: 20
+  sneakers: [new Sneaker(12), new Sneaker(), new Sneaker()], gst: 85
 }, {
-  sneakers: [new Sneaker(9)], gst: 5
+  sneakers: [new Sneaker(11)], gst: 37
 }, {
-  sneakers: [new Sneaker(9)], gst: 7
+  sneakers: [new Sneaker(11)], gst: 27
 }, {
-  sneakers: [new Sneaker(4)], gst: 0
+  sneakers: [new Sneaker(9)], gst: 9
 }], {
   maxLevel: 9,
   endDate: 100,
