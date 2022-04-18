@@ -33,7 +33,7 @@ const ENERGY = [
 ];
 const LEVELING_COST = [0, 1, 2, 3, 4, 10, 6, 7, 8, 9, 30, 11, 12, 13, 14, 15, 16, 17, 18, 19, 80, 21, 22, 23, 24, 25, 26, 27, 28];
 const COST_OF_NEW_ACCOUNT = 220;
-const SNEAKER_COST = 8.4 * (130 / 4.3);
+const SNEAKER_COST = 8.4 * (93 / 4.1);
 
 
 
@@ -276,13 +276,17 @@ class Game {
 
 
 const game1 = new Game([{
-  sneakers: [new Sneaker(12), new Sneaker(), new Sneaker()], gst: 85
+  sneakers: [new Sneaker(12), new Sneaker(), new Sneaker()], gst: 0
 }, {
-  sneakers: [new Sneaker(11)], gst: 37
+  sneakers: [new Sneaker(11)], gst: 9
 }, {
-  sneakers: [new Sneaker(11)], gst: 27
+  sneakers: [new Sneaker(11)], gst: 9
 }, {
   sneakers: [new Sneaker(9)], gst: 9
+}, {
+  sneakers: [new Sneaker(9)], gst: 9
+}, {
+  sneakers: [new Sneaker(5)], gst: 0
 }], {
   maxLevel: 9,
   endDate: 100,
@@ -298,13 +302,17 @@ game1.start();
 
 
 const game2 = new Game([{
-  sneakers: [new Sneaker(12), new Sneaker(), new Sneaker()], gst: 85
+  sneakers: [new Sneaker(12), new Sneaker(), new Sneaker()], gst: 0
 }, {
-  sneakers: [new Sneaker(11)], gst: 37
+  sneakers: [new Sneaker(11)], gst: 9
 }, {
-  sneakers: [new Sneaker(11)], gst: 27
+  sneakers: [new Sneaker(11)], gst: 9
 }, {
   sneakers: [new Sneaker(9)], gst: 9
+}, {
+  sneakers: [new Sneaker(9)], gst: 9
+}, {
+  sneakers: [new Sneaker(5)], gst: 0
 }], {
   maxLevel: 9,
   endDate: 100,
