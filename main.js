@@ -31,9 +31,12 @@ const ENERGY = [
   7.32,  /*0.12*/
 /*30*/7.45 /*0.13*/
 ];
-const LEVELING_COST = [0, 1, 2, 3, 4, 10, 6, 7, 8, 9, 30, 11, 12, 13, 14, 15, 16, 17, 18, 19, 80, 21, 22, 23, 24, 25, 26, 27, 28];
-const COST_OF_NEW_ACCOUNT = 220;
-const SNEAKER_COST = 8.4 * (93 / 4.1);
+const GMT = 0.8; // GMT to GST
+const SOL_TO_USDT = 107;
+const GST_TO_USDT = 4.4;
+const LEVELING_COST = [0, 1, 2, 3, 4, 10 + 10*GMT, 6, 7, 8, 9, 30+30*GMT, 11, 12, 13, 14, 15, 16, 17, 18, 19, 80+80*GMT, 21, 22, 23, 24, 25, 26, 27, 28, 29+10*GMT, 150+100*GMT];
+const COST_OF_NEW_ACCOUNT = 200 + 10 + 10 + 10*GMT;
+const SNEAKER_COST = 11.6 * (SOL_TO_USDT / GST_TO_USDT);
 
 
 
@@ -276,7 +279,7 @@ class Game {
 
 
 const game1 = new Game([{
-  sneakers: [new Sneaker(12), new Sneaker(), new Sneaker()], gst: 0
+  sneakers: [new Sneaker(9), new Sneaker(), new Sneaker()], gst: 0
 }, {
   sneakers: [new Sneaker(11)], gst: 9
 }, {
@@ -286,9 +289,9 @@ const game1 = new Game([{
 }, {
   sneakers: [new Sneaker(9)], gst: 9
 }, {
-  sneakers: [new Sneaker(5)], gst: 0
+  sneakers: [new Sneaker(12)], gst: 0
 }], {
-  maxLevel: 9,
+  maxLevel: 19,
   endDate: 100,
   maxEnergy: 38,
   energyLimit: 36,
@@ -302,7 +305,7 @@ game1.start();
 
 
 const game2 = new Game([{
-  sneakers: [new Sneaker(12), new Sneaker(), new Sneaker()], gst: 0
+  sneakers: [new Sneaker(9), new Sneaker(), new Sneaker()], gst: 0
 }, {
   sneakers: [new Sneaker(11)], gst: 9
 }, {
@@ -312,7 +315,7 @@ const game2 = new Game([{
 }, {
   sneakers: [new Sneaker(9)], gst: 9
 }, {
-  sneakers: [new Sneaker(5)], gst: 0
+  sneakers: [new Sneaker(12)], gst: 0
 }], {
   maxLevel: 9,
   endDate: 100,
@@ -320,7 +323,7 @@ const game2 = new Game([{
   energyLimit: 14,
   maxEarningsPerDay: 300,
   takeMoneyEveryNDay: 7,
-  maxGST: 441 + 220*22,
+  maxGST: calculateLevelUp(9, 28) + COST_OF_NEW_ACCOUNT * 22,
 });
 
 game2.start();
@@ -328,6 +331,13 @@ game2.start();
 // game1.finishLog();
 // game2.finishLog();
 
+function calculateLevelUp(from, to) {
+  let res = 0;
+  for(let i = from+1; i <= to; i++) {
+    res += LEVELING_COST[i];
+  }
+  return res;
+}
 
 function generateData(logs) {
   let maxLength = 0;
